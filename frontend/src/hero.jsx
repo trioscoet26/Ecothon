@@ -6,6 +6,7 @@ import 'slick-carousel';
 import noUiSlider from 'nouislider';
 import 'nouislider/distribute/nouislider.css';
 import Map from "./map";
+import { Link } from "react-router-dom";
 
 
 const Hero = () => {
@@ -57,16 +58,24 @@ const Hero = () => {
     <div className="bg-neutral-900 text-white">
       <header className="flex justify-between items-center p-6 ">
         <h1 className="text-2xl font-bold text-yellow-500">WildLife Tracker</h1>
-
         <nav>
-          <ul className="flex space-x-6">
-            {['Home', 'Wildlife Map', 'Protection Guide', 'Community', 'About', 'Contact'].map((item) => (
-              <li key={item}>
-                <a href="#" className="hover:text-yellow-500">{item}</a>
-              </li>
-            ))}
-          </ul>
-        </nav>
+      <ul className="flex space-x-6">
+        {[
+          { name: "Home", path: "/" },
+          { name: "Wildlife Map", path: "/wildlife-map" },
+          { name: "Protection Guide", path: "/protection-guide" },
+          { name: "Community", path: "/community" },
+          { name: "About", path: "/about" },
+          { name: "Contact", path: "/contact" }
+        ].map((item) => (
+          <li key={item.name}>
+            <Link to={item.path} className="hover:text-yellow-500">
+              {item.name}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
         
       </header>
 
