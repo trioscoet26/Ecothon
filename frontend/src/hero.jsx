@@ -1,191 +1,231 @@
-import { useEffect } from 'react';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import $ from 'jquery';
 import 'slick-carousel';
-import noUiSlider from 'nouislider';
 import 'nouislider/distribute/nouislider.css';
 import Map from "./map";
-import { Link } from "react-router-dom";
-
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+import SwiperCore from 'swiper';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import { useState, useEffect } from "react";
 
 const Hero = () => {
-    useEffect(() => {
-        // Initialize Slick slider
-        if (!$('.wildlife-slider').hasClass('slick-initialized')) {
-          $('.wildlife-slider').slick({
-            dots: true,
-            infinite: true,
-            speed: 300,
-            slidesToShow: 1,
-            adaptiveHeight: true,
-            autoplay: true,
-            autoplaySpeed: 3000,
-            fade: true,
-            cssEase: 'linear',
-          });
-        }
-      
-        // Initialize noUiSlider if it hasn't been initialized yet
-        const dateSlider = document.getElementById('date-slider');
-        if (dateSlider && !dateSlider.noUiSlider) {
-          noUiSlider.create(dateSlider, {
-            start: [new Date().getTime()],
-            range: {
-              min: new Date('2023-01-01').getTime(),
-              max: new Date('2023-12-31').getTime(),
-            },
-            format: {
-              to: (value) => {
-                const date = new Date(value);
-                return isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0];
-              },
-              from: (value) => new Date(value).getTime(),
-            },
-          });
-      
-          dateSlider.noUiSlider.on('update', (values, handle) => {
-            const dateInput = document.getElementById('date');
-            if (dateInput) {
-              dateInput.value = values[handle];
-            }
-          });
-        }
-      }, []);
+  const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [selectedCity, setSelectedCity] = useState(null); // Store the selected city
+  const [cityData, setCityData] = useState(null); // Store the response of  selected location 
+  
+  useEffect(() => {
+    if (query.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+    const fetchCities = async () => {
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${query}&format=json`
+        );
+        const data = await response.json();
+        setSuggestions(data);
+      } catch (error) {
+        console.error("Error fetching city suggestions:", error);
+      }
+    };
+
+    const timeoutId = setTimeout(() => {
+      fetchCities();
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [query]);
+
+  const handleCitySelect = (city) => {
+    setQuery(city.display_name);
+    setSelectedCity(city); // Store the selected city
+    setSuggestions([]); // Clear suggestions after selection
+  };
+
+  const handleSearchSubmit = async () => {
+    if (!selectedCity) return;
+
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${selectedCity.display_name}&format=json` // Replace with your actual API URL
+      );
+      const data = await response.json();
+      setCityData(data); // Store the response from the API call
+      console.log("API Response:", data);
+    } catch (error) {
+      console.error("Error fetching city data:", error);
+    }
+  };
+  SwiperCore.use([Navigation, Pagination, Autoplay]);
+  const images = [
+    "SPCo9VuKrWjdkTTA2QSZ1VNwE-GvqH7MKFuFgXkEXLE",
+    "Vy9pC9Qhr2KO8-KeMj9ZwQ0izUiJzuCskJYiKowVQwA",
+    "xzZRuhErxaiTcWv2rQVQ5D2n7_2UqOSnigWuoQzqsYY",
+    "_Am6logJrHW1dnYG5ImYbaOYsJ1uiqbQUcSkHxDuIpg",
+    "8zAEZL6XqxzGhK2SxWgXePLrJbmHPk1i6jmcbkNKWqo",
+    "fsQwN7qpM5LXvABFRx1BYdTtXBmPcrakdJ3NyzQuMUg"
+  ];
+
       
 
   return (
     <div className="bg-neutral-900 text-white">
       <header className="flex justify-between items-center p-6 ">
-        <h1 className="text-2xl font-bold text-yellow-500">WildLife Tracker</h1>
-        <nav>
-      <ul className="flex space-x-6">
-        {[
-          { name: "Home", path: "/" },
-          { name: "Wildlife Map", path: "/wildlife-map" },
-          { name: "Protection Guide", path: "/protection-guide" },
-          { name: "Community", path: "/community" },
-          { name: "About", path: "/about" },
-          { name: "Contact", path: "/contact" }
-        ].map((item) => (
-          <li key={item.name}>
-            <Link to={item.path} className="hover:text-yellow-500">
-              {item.name}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </nav>
-        
       </header>
 
-      <main className="flex flex-col lg:flex-row items-center justify-between p-12">
-        <div className="text-center lg:text-left lg:w-1/2">
-          <h2 className="text-5xl font-bold mb-4">Track & Protect Wildlife</h2>
-          <p className="mb-6">Discover local wildlife, get real-time alerts, and help protect endangered species in your area.</p>
-          <div className="flex justify-center lg:justify-start space-x-4">
-            <button className="bg-yellow-500 text-black px-6 py-2 rounded-full font-semibold">Explore Now</button>
-            <button className="border border-yellow-500 text-yellow-500 px-6 py-2 rounded-full font-semibold">Learn More</button>
-          </div>
+      <main className="flex flex-col lg:flex-row items-center justify-between p-20">
+      <div className="text-center lg:text-left lg:w-1/2">
+        <h2 className="text-5xl font-bold mb-4">Track & Protect Wildlife</h2>
+        <p className="mb-6">Discover local wildlife, get real-time alerts, and help protect endangered species in your area.</p>
+        <div className="flex justify-center lg:justify-start space-x-4">
+          <button className="bg-yellow-500 text-black px-6 py-2 rounded-full font-semibold shadow-lg hover:bg-yellow-600 transition">Explore Now</button>
+          <button className="border border-yellow-500 text-yellow-500 px-6 py-2 rounded-full font-semibold shadow-lg hover:bg-yellow-500 hover:text-black transition">Learn More</button>
         </div>
+      </div>
 
-        <div className="wildlife-slider lg:w-1/3 mt-8 lg:mt-0">
-          {[
-            "SPCo9VuKrWjdkTTA2QSZ1VNwE-GvqH7MKFuFgXkEXLE",
-            "Vy9pC9Qhr2KO8-KeMj9ZwQ0izUiJzuCskJYiKowVQwA",
-            "xzZRuhErxaiTcWv2rQVQ5D2n7_2UqOSnigWuoQzqsYY",
-            "_Am6logJrHW1dnYG5ImYbaOYsJ1uiqbQUcSkHxDuIpg",
-            "8zAEZL6XqxzGhK2SxWgXePLrJbmHPk1i6jmcbkNKWqo",
-            "fsQwN7qpM5LXvABFRx1BYdTtXBmPcrakdJ3NyzQuMUg"
-          ].map((img, index) => (
-            <div key={index}>
+      <div className="lg:w-1/3 mt-8 lg:mt-0">
+        <Swiper
+          modules={[Navigation, Pagination, Autoplay]}
+          spaceBetween={20}
+          slidesPerView={1}
+          navigation
+          pagination={{ clickable: true }}
+          autoplay={{ delay: 3000 }}
+          loop
+          className="rounded-lg shadow-lg"
+        >
+          {images.map((img, index) => (
+            <SwiperSlide key={index}>
               <img
                 src={`https://storage.googleapis.com/a1aa/image/${img}.jpg`}
                 alt={`Wildlife image ${index + 1}`}
-                className="rounded-lg"
+                className="rounded-lg w-full object-cover"
               />
-            </div>
+            </SwiperSlide>
           ))}
-        </div>
-      </main>
-
-     
-      <section id="hero" className="bg-neutral-900 text-white py-20">
-     
-      <div className="pt-20 border-t border-neutral-800"/>
-
-      <div className="container mx-auto px-6">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <div className="animate__animated animate__fadeInUp">
-            <h1 className="text-5xl lg:text-7xl font-bold mb-8 leading-tight">
-              <span className="text-[#FFB302]">Discover</span> and Protect Wildlife in Your Area
-            </h1>
-            <p className="text-xl mb-8">
-              Track local wildlife, receive real-time alerts, and contribute to conservation efforts. Join our community of wildlife enthusiasts and make a difference.
-            </p>
-            
-            <div className="grid sm:grid-cols-2 gap-4 mb-12">
-              <div className="bg-neutral-800 p-6 rounded-lg">
-                <div className="text-[#FFB302] text-4xl mb-2">500+</div>
-                <div className="text-gray-300">Species Tracked</div>
-              </div>
-              <div className="bg-neutral-800 p-6 rounded-lg">
-                <div className="text-[#FFB302] text-4xl mb-2">10K+</div>
-                <div className="text-gray-300">Active Users</div>
-              </div>
-            </div>
-
-            <div className="space-x-4">
-              <a href="#get-started" className="bg-[#FFB302] text-neutral-900 px-8 py-4 rounded-full font-bold inline-block hover:bg-[#FFB302]/90 transition-colors">Get Started</a>
-              <a href="#learn-more" className="border-2 border-[#FFB302] px-8 py-4 rounded-full font-bold inline-block hover:bg-[#FFB302]/10 transition-colors">Watch Demo</a>
-            </div>
-          </div>
-
-          <div className="lg:pl-12 animate__animated animate__fadeInRight">
-            <div className="bg-neutral-800 rounded-xl p-8 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#FFB302]/10 rounded-full -mr-16 -mt-16"></div>
-              <div className="relative z-10">
-                <h3 className="text-2xl font-bold mb-6">Quick Wildlife Search</h3>
-                <form className="space-y-6">
-                  <div>
-                    <label className="block mb-2 text-sm">Your Location</label>
-                    <div className="flex gap-4">
-                      <input type="text" placeholder="Enter city or region" className="flex-1 px-4 py-3 rounded-lg bg-neutral-700 focus:ring-2 focus:ring-[#FFB302] outline-none" />
-                      <button type="button" className="bg-neutral-700 p-3 rounded-lg">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block mb-2 text-sm">Date</label>
-                      <input type="date" className="w-full px-4 py-3 rounded-lg bg-neutral-700 focus:ring-2 focus:ring-[#FFB302] outline-none" />
-                    </div>
-                    <div>
-                      <label className="block mb-2 text-sm">Season</label>
-                      <select className="w-full px-4 py-3 rounded-lg bg-neutral-700 focus:ring-2 focus:ring-[#FFB302] outline-none">
-                        <option>Spring</option>
-                        <option>Summer</option>
-                        <option>Fall</option>
-                        <option>Winter</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <button className="w-full bg-[#FFB302] text-neutral-900 py-4 rounded-full font-bold hover:bg-[#FFB302]/90 transition-colors">
-                    Search Wildlife Activity
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
+        </Swiper>
       </div>
-    </section>
+    </main>
+     
+
+
+
+
+
+     
+    <section id="hero" className="bg-neutral-900 text-white py-20">
+        <div className="pt-20 border-t border-neutral-800" />
+        <div className="container mx-auto px-6">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="animate__animated animate__fadeInUp">
+              <h1 className="text-5xl lg:text-7xl font-bold mb-8 leading-tight">
+                <span className="text-[#FFB302]">Discover</span> and Protect Wildlife in Your Area
+              </h1>
+              <p className="text-xl mb-8">
+                Track local wildlife, receive real-time alerts, and contribute to conservation efforts.
+              </p>
+
+              <div className="grid sm:grid-cols-2 gap-4 mb-12">
+                <div className="bg-neutral-800 p-6 rounded-lg">
+                  <div className="text-[#FFB302] text-4xl mb-2">500+</div>
+                  <div className="text-gray-300">Species Tracked</div>
+                </div>
+                <div className="bg-neutral-800 p-6 rounded-lg">
+                  <div className="text-[#FFB302] text-4xl mb-2">10K+</div>
+                  <div className="text-gray-300">Active Users</div>
+                </div>
+              </div>
+
+              <div className="space-x-4">
+                <a href="#get-started" className="bg-[#FFB302] text-neutral-900 px-8 py-4 rounded-full font-bold inline-block hover:bg-[#FFB302]/90 transition-colors">
+                  Get Started
+                </a>
+                <a href="#learn-more" className="border-2 border-[#FFB302] px-8 py-4 rounded-full font-bold inline-block hover:bg-[#FFB302]/10 transition-colors">
+                  Watch Demo
+                </a>
+              </div>
+            </div>
+
+            <div className="lg:pl-12 animate__animated animate__fadeInRight">
+              <div className="bg-neutral-800 rounded-xl p-8 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#FFB302]/10 rounded-full -mr-16 -mt-16"></div>
+                <div className="relative z-10">
+                  <h3 className="text-2xl font-bold mb-6">Quick Wildlife Search</h3>
+                  <form
+                    className="space-y-6"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleSearchSubmit();
+                    }}
+                  >
+                    <div className="relative">
+                      <label className="block mb-2 text-sm">Your Location</label>
+                      <div className="flex gap-4">
+                        <input
+                          type="text"
+                          placeholder="Enter city or region"
+                          value={query}
+                          onChange={(e) => setQuery(e.target.value)}
+                          className="flex-1 px-4 py-3 rounded-lg bg-neutral-700 focus:ring-2 focus:ring-[#FFB302] outline-none"
+                        />
+                      </div>
+                      {/* Suggestions dropdown */}
+                      {suggestions.length > 0 && (
+                        <ul className="absolute left-0 w-full bg-neutral-800 border border-neutral-700 mt-1 rounded-lg shadow-lg max-h-40 overflow-auto z-10">
+                          {suggestions.map((city, index) => (
+                            <li
+                              key={index}
+                              className="px-4 py-2 hover:bg-neutral-700 cursor-pointer"
+                              onClick={() => handleCitySelect(city)}
+                            >
+                              {city.display_name}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block mb-2 text-sm">Date</label>
+                        <input
+                          type="date"
+                          className="w-full px-4 py-3 rounded-lg bg-neutral-700 focus:ring-2 focus:ring-[#FFB302] outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block mb-2 text-sm">Season</label>
+                        <select className="w-full px-4 py-3 rounded-lg bg-neutral-700 focus:ring-2 focus:ring-[#FFB302] outline-none">
+                          <option>Spring</option>
+                          <option>Summer</option>
+                          <option>Fall</option>
+                          <option>Winter</option>
+                        </select>
+                      </div>
+                    </div>
+                    <button className="w-full bg-[#FFB302] text-neutral-900 py-4 rounded-full font-bold hover:bg-[#FFB302]/90 transition-colors">
+                      Search Wildlife Activity
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+
+
+
+
+
+
     <section id="wildlife-map" className="bg-neutral-900 py-20 text-white">
     <div className="pt-20 border-t border-neutral-800"/>
 
@@ -193,7 +233,7 @@ const Hero = () => {
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1">
             <div className="animate__animated animate__fadeInLeft">
-              <h2 className="text-3xl font-bold mb-6">Wildlife Activity Map</h2>
+              <h2 className="text-3xl font-bold mb-6">            <span className="text-[#FFB302]">WildLife</span> Activity Map</h2>
               <p className="text-neutral-300 mb-6">Explore real-time wildlife activity, migration patterns, and protected areas in your region.</p>
               
               <div className="bg-neutral-700 rounded-lg p-6 mb-6">
@@ -236,7 +276,7 @@ const Hero = () => {
           </div>
 
           <div className="lg:col-span-2 animate__animated animate__fadeInRight">
-            <div className="bg-neutral-700 rounded-xl  relative">
+            <div className="bg-neutral-700 rounded-xl  relative z-0">
               <div id="map" className="absolute inset-0 rounded-xl">
                  < Map/>
                </div>
@@ -253,7 +293,8 @@ const Hero = () => {
   <div className="pt-20 border-t border-neutral-800"/>
 
     <div className="text-center mb-16 animate__animated animate__fadeIn">
-      <h2 className="text-4xl font-bold mb-4">Wildlife Protection Alerts</h2>
+      <h2 className="text-4xl font-bold mb-4">           
+         <span className="text-[#FFB302]">WildLife</span> Protection Alerts</h2>
       <p className="text-neutral-300 max-w-2xl mx-auto">
         Stay informed about wildlife activity and protected zones in your area
       </p>
@@ -410,7 +451,7 @@ const Hero = () => {
 
     <div className="container mx-auto px-6">
       <div className="text-center mb-16 animate__animated animate__fadeIn">
-        <h2 className="text-4xl font-bold mb-4 text-white">Key Features</h2>
+        <h2 className="text-4xl font-bold mb-4 text-white">Key             <span className="text-[#FFB302]">Features</span> </h2>
         <p className="text-gray-400 max-w-2xl mx-auto">
           Discover how our platform helps protect wildlife and enhance your
           outdoor experience
@@ -628,7 +669,8 @@ const Hero = () => {
     <div className="text-center mb-16 animate__animated animate__fadeIn">
 
       <h2 className="text-4xl font-bold mb-4 text-white">
-        Wildlife Protection Guide
+        Wildlife Protection            
+        <span className="text-[#FFB302]">Guide</span> 
       </h2>
       <p className="text-gray-400 max-w-2xl mx-auto">
         Learn how to protect and preserve wildlife in your area with our
@@ -843,158 +885,7 @@ const Hero = () => {
 
 
 
-<footer id="footer" className="relative pt-2 pb-10 overflow-hidden rotating-border">
-  <div className="">
-    <div className="pt-8 border-t border-neutral-800">
-    <div className="container mx-auto px-6">
-    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-      <div className="space-y-6">
-        <h3 className="text-2xl font-bold text-[#FFB302]">Wildlife Tracker</h3>
-        <p className="text-neutral-400">
-          Protecting wildlife through technology and community engagement.
-        </p>
-        <div className="flex space-x-4">
-          <a href="#" className="text-neutral-400 hover:text-[#FFB302]">
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-            </svg>
-          </a>
-          <a href="#" className="text-neutral-400 hover:text-[#FFB302]">
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
-            </svg>
-          </a>
-          <a href="#" className="text-neutral-400 hover:text-[#FFB302]">
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm4.441 16.892c-2.102.144-6.784.144-8.883 0C5.282 16.736 5.017 15.622 5 12c.017-3.629.285-4.736 2.558-4.892 2.099-.144 6.782-.144 8.883 0C18.718 7.264 18.982 8.378 19 12c-.018 3.629-.285 4.736-2.559 4.892zM10 9.658l4.917 2.338L10 14.342V9.658z" />
-            </svg>
-          </a>
-        </div>
-      </div>
-      <div>
-        <h4 className="text-lg font-semibold mb-6">Quick Links</h4>
-        <ul className="space-y-4">
-          <li>
-            <a href="/" className="text-neutral-400 hover:text-[#FFB302]">
-              Home
-            </a>
-          </li>
-          <li>
-            <a
-              href="/wildlife-map"
-              className="text-neutral-400 hover:text-[#FFB302]"
-            >
-              Wildlife Map
-            </a>
-          </li>
-          <li>
-            <a
-              href="/protection-guide"
-              className="text-neutral-400 hover:text-[#FFB302]"
-            >
-              Protection Guide
-            </a>
-          </li>
-          <li>
-            <a
-              href="/community"
-              className="text-neutral-400 hover:text-[#FFB302]"
-            >
-              Community
-            </a>
-          </li>
-          <li>
-            <a href="/about" className="text-neutral-400 hover:text-[#FFB302]">
-              About
-            </a>
-          </li>
-          <li>
-            <a
-              href="/contact"
-              className="text-neutral-400 hover:text-[#FFB302]"
-            >
-              Contact
-            </a>
-          </li>
-        </ul>
-      </div>
-      <div>
-        <h4 className="text-lg font-semibold mb-6">Resources</h4>
-        <ul className="space-y-4">
-          <li>
-            <a
-              href="/privacy"
-              className="text-neutral-400 hover:text-[#FFB302]"
-            >
-              Privacy Policy
-            </a>
-          </li>
-          <li>
-            <a href="/terms" className="text-neutral-400 hover:text-[#FFB302]">
-              Terms of Service
-            </a>
-          </li>
-          <li>
-            <a href="/faq" className="text-neutral-400 hover:text-[#FFB302]">
-              FAQ
-            </a>
-          </li>
-          <li>
-            <a
-              href="/contact"
-              className="text-neutral-400 hover:text-[#FFB302]"
-            >
-              Contact
-            </a>
-          </li>
-        </ul>
-      </div>
-      <div>
-        <h4 className="text-lg font-semibold mb-6">Newsletter</h4>
-        <p className="text-neutral-400 mb-4">
-          Stay updated with latest wildlife activities and protection
-          guidelines.
-        </p>
-        <form className="space-y-4">
-          <div>
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="w-full px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-lg focus:ring-2 focus:ring-[#FFB302] focus:border-transparent"
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-[#FFB302] text-neutral-900 py-2 rounded-lg font-medium hover:bg-[#FFB302]/90 transition-colors"
-          >
-            Subscribe
-          </button>
-        </form>
-      </div>
-    </div>
-    <div className="border-t border-neutral-800 pt-8">
-      <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-        <div className="text-neutral-400 text-sm">
-          © 2024 Wildlife Tracker. All rights reserved.
-        </div>
-        <div className="flex space-x-6">
-          <a href="#" className="text-neutral-400 hover:text-[#FFB302] text-sm">
-            Terms of Service
-          </a>
-          <a href="#" className="text-neutral-400 hover:text-[#FFB302] text-sm">
-            Privacy Policy
-          </a>
-          <a href="#" className="text-neutral-400 hover:text-[#FFB302] text-sm">
-            Cookie Policy
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>    </div>
-  </div>
 
- 
-</footer>
 
     </div>
   );
