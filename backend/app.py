@@ -10,6 +10,11 @@ CORS(app)
 with open('wildlife_model.pkl', 'rb') as f:
     model = pickle.load(f)
 
+with open('plant_model.pkl', 'rb') as f:
+    model = pickle.load(f)
+
+with open('bird_model.pkl', 'rb') as f:
+    model = pickle.load(f)    
     
 @app.route('/api/hello', methods=['GET'])
 def hello():
