@@ -9,7 +9,14 @@ import SwiperCore from 'swiper';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import { useState, useEffect } from "react";
+import { useState, useEffect } from "react"; 
+import image1 from './assets/1.jpg'
+import image2 from './assets/2.jpg'
+import image3 from './assets/3.jpg'
+import image4 from './assets/4.jpg'
+import image5 from './assets/5.jpg'
+import image6 from './assets/6.jpg'
+
 
 const Hero = () => {
   const [query, setQuery] = useState("");
@@ -62,14 +69,7 @@ const Hero = () => {
     }
   };
   SwiperCore.use([Navigation, Pagination, Autoplay]);
-  const images = [
-    "SPCo9VuKrWjdkTTA2QSZ1VNwE-GvqH7MKFuFgXkEXLE",
-    "Vy9pC9Qhr2KO8-KeMj9ZwQ0izUiJzuCskJYiKowVQwA",
-    "xzZRuhErxaiTcWv2rQVQ5D2n7_2UqOSnigWuoQzqsYY",
-    "_Am6logJrHW1dnYG5ImYbaOYsJ1uiqbQUcSkHxDuIpg",
-    "8zAEZL6XqxzGhK2SxWgXePLrJbmHPk1i6jmcbkNKWqo",
-    "fsQwN7qpM5LXvABFRx1BYdTtXBmPcrakdJ3NyzQuMUg"
-  ];
+  const images = [image1, image2, image3, image4, image5 , image6];
 
       
 
@@ -102,8 +102,8 @@ const Hero = () => {
           {images.map((img, index) => (
             <SwiperSlide key={index}>
               <img
-                src={`https://storage.googleapis.com/a1aa/image/${img}.jpg`}
-                alt={`Wildlife image ${index + 1}`}
+                  src={img}
+                 alt={`Wildlife image ${index + 1}`}
                 className="rounded-lg w-full object-cover"
               />
             </SwiperSlide>
