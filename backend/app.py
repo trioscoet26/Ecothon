@@ -7,6 +7,8 @@ app = Flask(__name__)
 CORS(app)
 
 # Load the trained model once when the app starts
+
+"""
 with open('wildlife_model.pkl', 'rb') as f:
     model = pickle.load(f)
 
@@ -15,6 +17,8 @@ with open('plant_model.pkl', 'rb') as f:
 
 with open('bird_model.pkl', 'rb') as f:
     model = pickle.load(f)    
+
+"""
     
 @app.route('/api/hello', methods=['GET'])
 def hello():
