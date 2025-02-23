@@ -12,8 +12,10 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.0.6",
     "axios": "^1.7.9",
+    "framer-motion": "^12.4.7",
     "jquery": "^3.7.1",
     "leaflet": "^1.9.4",
+    "lucide-react": "^0.475.0",
     "nouislider-react": "^3.4.2",
     "react": "^19.0.0",
     "react-chatbot-kit": "^2.2.2",
